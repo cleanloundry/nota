@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nota Digital Laundry - Auto Tanggal Indonesia & Invoice</title>
+    
+    <!-- Import Font Estetik dari Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Import Library html2canvas untuk mengubah HTML menjadi Gambar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* =========================================
+           VARIABEL WARNA & EFEK ESTETIK
+           ========================================= */
+        :root {
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --primary-color: #6c5ce7; 
+            --primary-hover: #a29bfe;
+            --download-color: #00b894; 
+            --download-hover: #00cec9;
+            --lunas-color: #27ae60;
+            --belum-lunas-color: #e74c3c;
+            --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        /* =========================================
+           RESET & BODY
+           ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 3rem 1rem;
+        }
+
+        /* =========================================
+           LAYOUT CONTAINER
+           ========================================= */
+        .app-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--glass-shadow);
+            flex: 1;
+            min-width: 320px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* =========================================
+           STYLING FORM INPUT
+           ========================================= */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+        }
+
+        /* =========================================
+           STYLING TOMBOL
+           ========================================= */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-download {
+            background: var(--download-color);
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        .btn-download:hover {
+            background: var(--download-hover);
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+        }
+
+        /* =========================================
+           STYLING AREA NOTA (KERTAS STRUK)
+           ========================================= */
+        .nota-preview {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 16px;
+            border: 2px dashed #dcdde1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .nota-header {
+            text-align: center;
+            border-bottom: 2px solid #2d3436;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .nota-header h3 {
+            color: #2d3436;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .nota-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .nota-details { width: 100%; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .nota-details td { padding: 4px 0; }
+
+        .nota-items {
+            width: 100%;
+            font-size: 0.9rem;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        .nota-items th { border-bottom: 2px solid #2d3436; padding: 8px 0; text-align: left; font-weight: 600; }
+        .nota-items td { border-bottom: 1px dashed #dcdde1; padding: 10px 0; }
+
+        .nota-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: right;
+            color: #2d3436;
+            padding-top: 10px;
+        }
+
+        .nota-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2rem;
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .nota-footer p {
+            margin-bottom: 6px;
+        }
+
+        /* =========================================
+           PENGATURAN CETAK (PRINT)
+           ========================================= */
+        @media print {
+            body { background: white; padding: 0; align-items: flex-start; }
+            .noprint { display: none !important; }
+            .app-container { display: block; }
+            .glass-card { background: none; border: none; box-shadow: none; padding: 0; }
+            .nota-preview { border: none; padding: 0; box-shadow: none; width: 100%; }
+            #tampilStatus { -webkit-print-color-adjust: exact; color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- BAGIAN 1: FORM INPUT -->
+        <div class="glass-card noprint">
+            <h2>✨ Input Data Laundry</h2>
+            
+            <form id="formLaundry" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label for="namaToko">Nama Laundry Anda</label>
+                    <input type="text" id="namaToko" value="CLEAN LAUNDRY" oninput="updateNota()">
+                </div>
+
+                <div class="form-group">
+                    <label for="noNota">Nomor Nota</label>
+                    <input type="text" id="noNota" value="INV-001" oninput="updateNota()">
+                </div>
+
+                <div class="form-group">
+                    <label for="namaPelanggan">Nama Pelanggan <span style="color: red;">*</span></label>
+                    <input type="text" id="namaPelanggan" placeholder="Masukkan nama pelanggan..." required oninput="updateNota()">
+                </div>
+
+                <div class="form-group">
+                    <label for="noWA">Nomor WhatsApp Pelanggan <span style="color: red;">*</span></label>
+                    <input type="number" id="noWA" placeholder="Contoh: 081234567890" required oninput="updateNota()">
+                </div>
+
+                <div class="form-group">
+                    <label for="tglMasuk">Tanggal Masuk</label>
+                    <input type="date" id="tglMasuk" onchange="updateNota()">
+                </div>
+
+                <div class="form-group">
+                    <label for="layanan">Jenis Layanan</label>
+                    <select id="layanan" onchange="updateNota()">
+                        <option value="6000">Cuci Komplit (Rp 6.000/kg)</option>
+                        <option value="4000">Setrika Saja (Rp 4.000/kg)</option>
+                        <option value="5000">Cuci Kering (Rp 4.500/kg)</option>
+                        <option value="10000">Seprai (Rp 10.000/pcs)</option>
+                        <option value="7000">Setrika Express (Rp 7.000/kg)</option>
+                        <option value="10000">Setrika Kilat (Rp 10.000/kg)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="berat">Berat (Kg) / Jumlah (Pcs)</label>
+                    <input type="number" id="berat" placeholder="Contoh: 3" value="1" min="1" oninput="updateNota()">
+                </div>
+
+                <div class="form-group">
+                    <label for="statusBayar">Status Pembayaran</label>
+                    <select id="statusBayar" onchange="updateNota()">
+                        <option value="Lunas">Lunas</option>
+                        <option value="Belum Lunas">Belum Lunas</option>
+                    </select>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn" onclick="prosesCetak()">🖨️ Cetak PDF</button>
+                    <button type="button" class="btn btn-download" id="btnDownload" onclick="prosesDownload()">📥 Download Nota</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- BAGIAN 2: PREVIEW NOTA -->
+        <div class="glass-card">
+            <h2 class="noprint">📄 Preview Nota</h2>
+            
+            <!-- Elemen Nota yang akan diubah otomatis menjadi gambar -->
+            <div class="nota-preview" id="notaArea">
+                <div class="nota-header">
+                    <h3 id="tampilToko">CLEAN LAUNDRY</h3>
+                    <p>Jl. Cipta Karya Gg Bahagia Aziziyyah No. 6<br>Telp/WA: 0823-7197-3497</p>
+                </div>
+                
+                <table class="nota-details">
+                    <tr>
+                        <td width="35%"><strong>No. Nota</strong></td>
+                        <td width="5%">:</td>
+                        <td id="tampilNoNota">INV-001</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pelanggan</strong></td>
+                        <td>:</td>
+                        <td id="tampilPelanggan">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>No. WhatsApp</strong></td>
+                        <td>:</td>
+                        <td id="tampilNoWA">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tgl Masuk</strong></td>
+                        <td>:</td>
+                        <td id="tampilTgl">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status Bayar</strong></td>
+                        <td>:</td>
+                        <td id="tampilStatus" style="font-weight: 700; color: var(--lunas-color);">LUNAS</td>
+                    </tr>
+                </table>
+
+                <table class="nota-items">
+                    <thead>
+                        <tr>
+                            <th>Layanan</th>
+                            <th>Qty/Kg</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="tampilLayanan">Cuci Komplit</td>
+                            <td id="tampilBerat">1</td>
+                            <td id="tampilSubtotal">Rp 6.000</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="nota-total">
+                    Total: <span id="tampilTotal">Rp 6.000</span>
+                </div>
+                
+                <div class="nota-footer">
+                    <p>Pakaian luntur bukan menjadi tanggung jawab laundry.</p>
+                    <p>Komplain pakaian kami layani 1x24 jam, sejak pakaian diambil.</p>
+                    <p>Pengambilan laundry wajib menggunakan nota asli.</p>
+                    <p>Laundry yang tidak diambil jangka waktu 1 bulan, jika terjadi kerusakan menjadi tanggung jawab pemilik.</p>
+                    <p>Terima kasih.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT JAVASCRIPT -->
+    <script>
+        // Fungsi untuk mendapatkan tanggal saat ini berdasarkan waktu lokal Indonesia (WIB/WITA/WIT perangkat)
+        function setTanggalIndonesiaOtomatis() {
+            const sekarang = new Date();
+            // Mengambil format tahun, bulan, dan tanggal lokal perangkat yang terhubung ke zona waktu Indonesia
+            const tahun = sekarang.getFullYear();
+            const bulan = String(sekarang.getMonth() + 1).padStart(2, '0');
+            const hari = String(sekarang.getDate()).padStart(2, '0');
+            
+            const tanggalLokals = `${tahun}-${bulan}-${hari}`;
+            document.getElementById('tglMasuk').value = tanggalLokals;
+        }
+
+        // Jalankan saat pertama kali halaman dimuat
+        setTanggalIndonesiaOtomatis();
+
+        function formatRupiah(angka) {
+            return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function formatTanggalIndo(tanggal) {
+            if (!tanggal) return '-';
+            const date = new Date(tanggal);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        function updateNota() {
+            const namaToko = document.getElementById('namaToko').value;
+            const noNota = document.getElementById('noNota').value;
+            const namaPelanggan = document.getElementById('namaPelanggan').value;
+            const noWA = document.getElementById('noWA').value;
+            
+            const tglMasukInput = document.getElementById('tglMasuk').value;
+            const tglMasukFormatted = formatTanggalIndo(tglMasukInput);
+            
+            const selectLayanan = document.getElementById('layanan');
+            const namaLayanan = selectLayanan.options[selectLayanan.selectedIndex].text.split(' (')[0];
+            const hargaLayanan = parseInt(selectLayanan.value);
+            const berat = parseFloat(document.getElementById('berat').value) || 0;
+            const statusBayar = document.getElementById('statusBayar').value;
+
+            const total = hargaLayanan * berat;
+
+            document.getElementById('tampilToko').innerText = namaToko || 'NAMA LAUNDRY';
+            document.getElementById('tampilNoNota').innerText = noNota || '-';
+            document.getElementById('tampilPelanggan').innerText = namaPelanggan || '-';
+            document.getElementById('tampilNoWA').innerText = noWA || '-';
+            document.getElementById('tampilTgl').innerText = tglMasukFormatted;
+            
+            const elemenStatus = document.getElementById('tampilStatus');
+            elemenStatus.innerText = statusBayar.toUpperCase();
+            if(statusBayar === "Lunas") {
+                elemenStatus.style.color = "var(--lunas-color)";
+            } else {
+                elemenStatus.style.color = "var(--belum-lunas-color)";
+            }
+            
+            document.getElementById('tampilLayanan').innerText = namaLayanan;
+            document.getElementById('tampilBerat').innerText = berat;
+            document.getElementById('tampilSubtotal').innerText = formatRupiah(total);
+            document.getElementById('tampilTotal').innerText = formatRupiah(total);
+        }
+
+        // Fungsi Otomatis Menaikkan Nomor Invoice (Auto-Increment)
+        function incrementInvoice() {
+            const inputNoNota = document.getElementById('noNota');
+            const nilaiSekarang = inputNoNota.value.trim();
+
+            const match = nilaiSekarang.match(/(\d+)$/);
+            
+            if (match) {
+                const angkaLama = match[1];
+                const angkaBaru = (parseInt(angkaLama, 10) + 1).toString().padStart(angkaLama.length, '0');
+                inputNoNota.value = nilaiSekarang.replace(/(\d+)$/, angkaBaru);
+            } else {
+                inputNoNota.value = nilaiSekarang + '-1';
+            }
+            updateNota();
+        }
+
+        function prosesCetak() {
+            const namaPelanggan = document.getElementById('namaPelanggan').value.trim();
+            const noWA = document.getElementById('noWA').value.trim();
+
+            if (namaPelanggan === "" || noWA === "") {
+                alert("Harap isi Nama Pelanggan dan Nomor WhatsApp terlebih dahulu!");
+                document.getElementById('namaPelanggan').reportValidity();
+                document.getElementById('noWA').reportValidity();
+                return;
+            }
+
+            window.print();
+            incrementInvoice(); 
+            setTanggalIndonesiaOtomatis(); // Reset tanggal kembali ke hari ini secara otomatis
+        }
+        
+        function prosesDownload() {
+            const namaPelanggan = document.getElementById('namaPelanggan').value.trim();
+            const noWA = document.getElementById('noWA').value.trim();
+
+            if (namaPelanggan === "" || noWA === "") {
+                alert("Harap isi Nama Pelanggan dan Nomor WhatsApp terlebih dahulu!");
+                document.getElementById('namaPelanggan').reportValidity();
+                document.getElementById('noWA').reportValidity();
+                return;
+            }
+
+            const btnDownload = document.getElementById('btnDownload');
+            btnDownload.innerText = "Memproses...";
+            btnDownload.disabled = true;
+
+            const notaElement = document.getElementById('notaArea');
+
+            html2canvas(notaElement, { scale: 2 }).then(canvas => {
+                const imageURL = canvas.toDataURL('image/png');
+
+                const downloadLink = document.createElement('a');
+                downloadLink.href = imageURL;
+                downloadLink.download = `Nota_${document.getElementById('noNota').value}_${namaPelanggan}.png`;
+                downloadLink.click();
+
+                btnDownload.innerHTML = "📥 Download Gambar";
+                btnDownload.disabled = false;
+
+                // Nomor invoice otomatis naik dan form direset untuk transaksi berikutnya
+                incrementInvoice();
+                setTanggalIndonesiaOtomatis(); // Pastikan tanggal otomatis kembali ke hari ini
+                document.getElementById('namaPelanggan').value = "";
+                document.getElementById('noWA').value = "";
+                document.getElementById('berat').value = "1";
+                updateNota();
+
+            }).catch(err => {
+                console.error("Gagal membuat gambar nota:", err);
+                alert("Terjadi kesalahan saat membuat gambar nota.");
+                btnDownload.innerHTML = "📥 Download Gambar";
+                btnDownload.disabled = false;
+            });
+        }
+
+        updateNota();
+    </script>
+</body>
+</html>
