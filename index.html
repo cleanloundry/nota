@@ -242,7 +242,7 @@
         
         <!-- BAGIAN 1: FORM INPUT -->
         <div class="glass-card noprint">
-            <h2>✨ Input Data Laundry</h2>
+            <h2>Input Data Laundry</h2>
             
             <form id="formLaundry" onsubmit="event.preventDefault();">
                 <div class="form-group">
@@ -283,8 +283,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="berat">Berat (Kg) / Jumlah (Pcs)</label>
-                    <input type="number" id="berat" placeholder="Contoh: 3" value="1" min="1" oninput="updateNota()">
+                    <label for="berat">Berat (Kg) / Jumlah (Pcs) [Bisa gunakan koma/titik]</label>
+                    <input type="text" id="berat" placeholder="Contoh: 10,2" value="1" oninput="updateNota()">
                 </div>
 
                 <div class="form-group">
@@ -296,15 +296,15 @@
                 </div>
 
                 <div class="btn-group">
-                    <button type="button" class="btn" onclick="prosesCetak()">🖨️ Cetak PDF</button>
-                    <button type="button" class="btn btn-download" id="btnDownload" onclick="prosesDownload()">📥 Download Nota</button>
+                    <button type="button" class="btn" onclick="prosesCetak()">Cetak PDF</button>
+                    <button type="button" class="btn btn-download" id="btnDownload" onclick="prosesDownload()">Download Nota</button>
                 </div>
             </form>
         </div>
 
         <!-- BAGIAN 2: PREVIEW NOTA -->
         <div class="glass-card">
-            <h2 class="noprint">📄 Preview Nota</h2>
+            <h2 class="noprint">Preview Nota</h2>
             
             <!-- Elemen Nota yang akan diubah otomatis menjadi gambar -->
             <div class="nota-preview" id="notaArea">
@@ -376,10 +376,8 @@
 
     <!-- SCRIPT JAVASCRIPT -->
     <script>
-        // Fungsi untuk mendapatkan tanggal saat ini berdasarkan waktu lokal Indonesia (WIB/WITA/WIT perangkat)
         function setTanggalIndonesiaOtomatis() {
             const sekarang = new Date();
-            // Mengambil format tahun, bulan, dan tanggal lokal perangkat yang terhubung ke zona waktu Indonesia
             const tahun = sekarang.getFullYear();
             const bulan = String(sekarang.getMonth() + 1).padStart(2, '0');
             const hari = String(sekarang.getDate()).padStart(2, '0');
@@ -388,11 +386,12 @@
             document.getElementById('tglMasuk').value = tanggalLokals;
         }
 
-        // Jalankan saat pertama kali halaman dimuat
         setTanggalIndonesiaOtomatis();
 
         function formatRupiah(angka) {
-            return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            // Membulatkan hasil akhir agar tidak menampilkan angka panjang di belakang koma (misal: 61.199)
+            const bulat = Math.round(angka);
+            return 'Rp ' + bulat.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
         function formatTanggalIndo(tanggal) {
@@ -413,8 +412,12 @@
             
             const selectLayanan = document.getElementById('layanan');
             const namaLayanan = selectLayanan.options[selectLayanan.selectedIndex].text.split(' (')[0];
-            const hargaLayanan = parseInt(selectLayanan.value);
-            const berat = parseFloat(document.getElementById('berat').value) || 0;
+            const hargaLayanan = parseFloat(selectLayanan.value);
+            
+            // Mengganti koma (,) menjadi titik (.) agar bisa dibaca oleh parser angka JavaScript
+            let beratInput = document.getElementById('berat').value.replace(',', '.');
+            const berat = parseFloat(beratInput) || 0;
+            
             const statusBayar = document.getElementById('statusBayar').value;
 
             const total = hargaLayanan * berat;
@@ -434,12 +437,11 @@
             }
             
             document.getElementById('tampilLayanan').innerText = namaLayanan;
-            document.getElementById('tampilBerat').innerText = berat;
+            document.getElementById('tampilBerat').innerText = document.getElementById('berat').value;
             document.getElementById('tampilSubtotal').innerText = formatRupiah(total);
             document.getElementById('tampilTotal').innerText = formatRupiah(total);
         }
 
-        // Fungsi Otomatis Menaikkan Nomor Invoice (Auto-Increment)
         function incrementInvoice() {
             const inputNoNota = document.getElementById('noNota');
             const nilaiSekarang = inputNoNota.value.trim();
@@ -469,7 +471,7 @@
 
             window.print();
             incrementInvoice(); 
-            setTanggalIndonesiaOtomatis(); // Reset tanggal kembali ke hari ini secara otomatis
+            setTanggalIndonesiaOtomatis();
         }
         
         function prosesDownload() {
@@ -497,12 +499,11 @@
                 downloadLink.download = `Nota_${document.getElementById('noNota').value}_${namaPelanggan}.png`;
                 downloadLink.click();
 
-                btnDownload.innerHTML = "📥 Download Gambar";
+                btnDownload.innerHTML = "Download Gambar";
                 btnDownload.disabled = false;
 
-                // Nomor invoice otomatis naik dan form direset untuk transaksi berikutnya
                 incrementInvoice();
-                setTanggalIndonesiaOtomatis(); // Pastikan tanggal otomatis kembali ke hari ini
+                setTanggalIndonesiaOtomatis();
                 document.getElementById('namaPelanggan').value = "";
                 document.getElementById('noWA').value = "";
                 document.getElementById('berat').value = "1";
@@ -511,7 +512,7 @@
             }).catch(err => {
                 console.error("Gagal membuat gambar nota:", err);
                 alert("Terjadi kesalahan saat membuat gambar nota.");
-                btnDownload.innerHTML = "📥 Download Gambar";
+                btnDownload.innerHTML = "Download Gambar";
                 btnDownload.disabled = false;
             });
         }
