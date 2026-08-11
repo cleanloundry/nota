@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nota Digital Laundry - Auto Tanggal Indonesia & Invoice</title>
+    <title>Nota Digital Clean Loundry</title>
     
     <!-- Import Font Estetik dari Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -252,7 +252,7 @@
 
                 <div class="form-group">
                     <label for="noNota">Nomor Nota</label>
-                    <input type="text" id="noNota" value="INV-001" oninput="updateNota()">
+                    <input type="text" id="noNota" value="INV-001" oninput="simpanNoNotaManual()">
                 </div>
 
                 <div class="form-group">
@@ -386,6 +386,17 @@
             document.getElementById('tglMasuk').value = tanggalLokals;
         }
 
+        // Muat nomor invoice tersimpan atau set default
+        function muatNomorInvoice() {
+            const savedInvoice = localStorage.getItem('lastInvoiceNumber');
+            if (savedInvoice) {
+                document.getElementById('noNota').value = savedInvoice;
+            } else {
+                document.getElementById('noNota').value = 'INV-001';
+            }
+        }
+
+        muatNomorInvoice();
         setTanggalIndonesiaOtomatis();
 
         function formatRupiah(angka) {
@@ -440,6 +451,13 @@
             document.getElementById('tampilTotal').innerText = formatRupiah(total);
         }
 
+        // Menyimpan nilai jika user mengubah nomor invoice secara manual
+        function simpanNoNotaManual() {
+            const val = document.getElementById('noNota').value;
+            localStorage.setItem('lastInvoiceNumber', val);
+            updateNota();
+        }
+
         function incrementInvoice() {
             const inputNoNota = document.getElementById('noNota');
             const nilaiSekarang = inputNoNota.value.trim();
@@ -453,6 +471,9 @@
             } else {
                 inputNoNota.value = nilaiSekarang + '-1';
             }
+            
+            // Simpan nomor invoice terbaru ke LocalStorage
+            localStorage.setItem('lastInvoiceNumber', inputNoNota.value);
             updateNota();
         }
 
@@ -468,7 +489,6 @@
             }
 
             window.print();
-            // Pindahkan increment ke sini
             incrementInvoice(); 
             setTanggalIndonesiaOtomatis();
         }
@@ -501,7 +521,6 @@
                 btnDownload.innerHTML = "Download Gambar";
                 btnDownload.disabled = false;
 
-                // Increment dilakukan setelah download selesai
                 incrementInvoice();
                 setTanggalIndonesiaOtomatis();
                 document.getElementById('namaPelanggan').value = "";
