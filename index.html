@@ -389,7 +389,6 @@
         setTanggalIndonesiaOtomatis();
 
         function formatRupiah(angka) {
-            // Membulatkan hasil akhir agar tidak menampilkan angka panjang di belakang koma (misal: 61.199)
             const bulat = Math.round(angka);
             return 'Rp ' + bulat.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
@@ -414,7 +413,6 @@
             const namaLayanan = selectLayanan.options[selectLayanan.selectedIndex].text.split(' (')[0];
             const hargaLayanan = parseFloat(selectLayanan.value);
             
-            // Mengganti koma (,) menjadi titik (.) agar bisa dibaca oleh parser angka JavaScript
             let beratInput = document.getElementById('berat').value.replace(',', '.');
             const berat = parseFloat(beratInput) || 0;
             
@@ -470,6 +468,7 @@
             }
 
             window.print();
+            // Pindahkan increment ke sini
             incrementInvoice(); 
             setTanggalIndonesiaOtomatis();
         }
@@ -502,6 +501,7 @@
                 btnDownload.innerHTML = "Download Gambar";
                 btnDownload.disabled = false;
 
+                // Increment dilakukan setelah download selesai
                 incrementInvoice();
                 setTanggalIndonesiaOtomatis();
                 document.getElementById('namaPelanggan').value = "";
